@@ -23,29 +23,6 @@ def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
         tate = False
     return yoko, tate
 
-class Beam:
-    """
-    こうかとんが放つビームに関するクラス
-    """
-    def __init__(self, bird: "Bird"):
-        """
-        ビーム画像Surfaceを生成する
-        引数 bird：ビームを放つこうかとん（Birdインスタンス）
-        """
-        self.img = pg.image.load("fig/beam.png")
-        self.rct = self.img.get_rect()
-        self.rct.centery = bird.rct.centery
-        self.rct.left = bird.rct.right  # こうかとんの右側から発射
-        self.vx, self.vy = +5, 0
-
-    def update(self, screen: pg.Surface):
-        """
-        ビームを速度ベクトルself.vx, self.vyに基づき移動させる
-        引数 screen：画面Surface
-        """
-        if check_bound(self.rct) == (True, True):  # 画面内であれば描画
-            self.rct.move_ip(self.vx, self.vy)
-            screen.blit(self.img, self.rct)
 
 class Bird:
     """
@@ -107,6 +84,31 @@ class Bird:
         screen.blit(self.img, self.rct)
 
 
+# ビームクラス:
+class Beam:
+    """
+    こうかとんが放つビームに関するクラス
+    """
+    def __init__(self, bird:"Bird"):
+        """
+        ビーム画像Surfaceを生成する
+        引数 bird：ビームを放つこうかとん（Birdインスタンス）
+        """
+        self.img = pg.image.load("fig/beam.png")
+        self.rct = self.img.get_rect()
+        self.rct.centery = bird.rct.centery
+        self.rct.left=bird.rct.right
+        self.vx, self.vy = +5, 0
+
+    def update(self, screen: pg.Surface):
+        """
+        ビームを速度ベクトルself.vx, self.vyに基づき移動させる
+        引数 screen：画面Surface
+        """
+        if check_bound(self.rct) == (True, True):
+            self.rct.move_ip(self.vx, self.vy)
+            screen.blit(self.img, self.rct)    
+
 
 class Bomb:
     """
@@ -153,22 +155,31 @@ def main():
             if event.type == pg.QUIT:
                 return
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
-                if beam is None:
-                    beam = Beam(bird)            
+                # スペースキー押下でBeamクラスのインスタンス生成
+                beam = Beam(bird)            
         screen.blit(bg_img, [0, 0])
-        
-        if bird.rct.colliderect(bomb.rct):
-            # ゲームオーバー時に，こうかとん画像を切り替え，1秒間表示させる
-            bird.change_img(8, screen)
-            pg.display.update()
-            time.sleep(1)
-            return
 
+        if bomb is not None:
+            if bird.rct.colliderect(bomb.rct):
+                bird.change_img(8, screen)
+                pg.display.update()
+                time.sleep(1)
+                return
+
+        if beam is not None:
+            if beam is not None:
+                if beam.rct.colliderect(bomb.rct):
+                        beam = None
+                        bomb = None
+                        bird.change_img(6, screen)
+             
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
-        if beam is not None: #ビームが存在するときだけscreenに
-            beam.update(screen)   
-        bomb.update(screen)
+
+        if beam is not None:
+                beam.update(screen) 
+        if bomb is not None:  
+                bomb.update(screen)
         pg.display.update()
         tmr += 1
         clock.tick(50)
