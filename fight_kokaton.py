@@ -93,10 +93,10 @@ class Bird:
                 sum_mv[1] += mv[1]
         self.rct.move_ip(sum_mv)
         if check_bound(self.rct) != (True, True):
-            self.rct.move_ip(-sum_mv[0], -sum_mv[1])
-        if not (sum_mv[0] == 0 and sum_mv[1] == 0):
-            self.img = __class__.imgs[tuple(sum_mv)]
-            self.dire = tuple(sum_mv)
+            self.rct.move_ip(-sum_mv[0], -sum_mv[1]) 
+        if not (sum_mv[0] == 0 and sum_mv[1] == 0): 
+            self.img = __class__.imgs[tuple(sum_mv)] #移動方向に応じて画像を切り替え
+            self.dire = tuple(sum_mv) # 向きの情報を保持
         screen.blit(self.img, self.rct)
 
 
